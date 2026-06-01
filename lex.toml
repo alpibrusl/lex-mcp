@@ -1,0 +1,10 @@
+[package]
+name        = "lex-mcp"
+version     = "0.1.0"
+lex         = "0.9.7"
+description = "MCP (Model Context Protocol) stdio server — bridges lex-agent Skills to MCP JSON-RPC."
+license     = "EUPL-1.2"
+
+[dependencies]
+lex-schema = { path = "../lex-schema" }
+lex-agent  = { path = "../lex-agent" }
