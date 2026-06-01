@@ -13,7 +13,10 @@
 #   }
 
 import "./protocol" as protocol
-import "./tool"     as tool
-import "./server"   as server
+
+import "./tool" as tool
+
+import "./server" as server
 
 type McpTool = tool.McpTool
+

@@ -21,14 +21,11 @@ import "./protocol" as proto
 # `skill.capability.description` → `McpTool.description`
 # `sch.to_json_schema(skill.capability.params)` → `McpTool.input_schema`
 fn skill_to_mcp_tool(skill :: srv.Skill) -> proto.McpTool {
-  {
-    name:         skill.capability.name,
-    description:  skill.capability.description,
-    input_schema: sch.to_json_schema(skill.capability.params),
-  }
+  { name: skill.capability.name, description: skill.capability.description, input_schema: sch.to_json_schema(skill.capability.params) }
 }
 
 # Convert all Skills on an AgentDef to a list of McpTools.
 fn agent_tools(agent :: srv.AgentDef) -> List[proto.McpTool] {
   list.map(agent.skills, skill_to_mcp_tool)
 }
+
