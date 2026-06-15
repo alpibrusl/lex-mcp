@@ -6,5 +6,5 @@ description = "MCP (Model Context Protocol) stdio server — bridges lex-agent S
 license     = "EUPL-1.2"
 
 [dependencies]
-lex-schema = { path = "../../generic/lex-schema" }
-lex-agent  = { path = "../lex-agent" }
+lex-schema = { git = "https://github.com/alpibrusl/lex-schema" }
+lex-agent  = { git = "https://github.com/alpibrusl/lex-agent" }
