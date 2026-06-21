@@ -8,3 +8,6 @@ license     = "EUPL-1.2"
 [dependencies]
 lex-schema = { git = "https://github.com/alpibrusl/lex-schema" }
 lex-agent  = { git = "https://github.com/alpibrusl/lex-agent" }
+# Already in the transitive closure (via lex-agent); declared directly so the
+# examples — which build Capabilities with `lex-spec/capability` — resolve and run.
+lex-spec   = { git = "https://github.com/alpibrusl/lex-spec" }
