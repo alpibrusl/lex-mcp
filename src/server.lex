@@ -5,7 +5,7 @@
 # stdout — the stdio transport defined by the MCP spec.
 #
 # The entry point is `run(agent)`. It loops until stdin closes (EOF
-# surfaces as `Err` from `io.read`).
+# surfaces as `None` from `io.readline`).
 #
 # Method routing:
 #   initialize              → MCP handshake (protocolVersion + serverInfo)
@@ -157,10 +157,18 @@ fn handle_tools_call(agent :: srv.AgentDef, req :: rpc.Request) -> [io, time, cr
 }
 
 # ---- stdio read-dispatch loop ------------------------------------
+#
+# Uses io.readline() (real stdin, one line per call — Ok(0 bytes read)
+# surfaces as None on EOF) rather than io.read("-"): io.read is a
+# whole-file read (std::fs::read_to_string on the runtime side), and
+# there is no "-" == stdin convention there — io.read("-") always fails
+# (either a file-not-found-style error, or "read of `-` outside
+# --allow-fs-read" under a read allowlist), so this loop previously
+# never processed a single request.
 fn run(agent :: srv.AgentDef) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Nil {
-  match io.read("-") {
-    Err(_) => (),
-    Ok(line) => {
+  match io.readline() {
+    None => (),
+    Some(line) => {
       let trimmed := str.trim(line)
       let response := if str.is_empty(trimmed) {
         ""

@@ -40,7 +40,7 @@ import "lex-agent/src/message" as msg
 
 import "lex-agent/src/task" as tk
 
-import "../src/mcp" as mcp
+import "../src/server" as mcp_srv
 
 # ---- echo capability ---------------------------------------------
 fn echo_capability() -> cap.Capability {
@@ -72,7 +72,12 @@ fn extract_text(parts :: List[msg.Part]) -> Str {
   })
 }
 
-fn echo_handler(m :: msg.Message) -> srv.HandlerOutcome {
+# Skill.handle's effect row is fixed by lex-agent's own type
+# ([io, time, crypto, random, sql, fs_read, fs_write, net, concurrent,
+# llm, proc] — see lex-agent/src/server.lex's Skill) and must match
+# exactly — lex effect rows are invariant, not subtyped, so even a
+# handler that does no effectful work itself has to carry the full row.
+fn echo_handler(m :: msg.Message) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] srv.HandlerOutcome {
   let text := extract_text(m.parts)
   let reply := msg.agent_text(str.concat("echo: ", text))
   { next_state: TSCompleted, reply: Some(reply), artifacts: [] }
@@ -86,6 +91,6 @@ fn make_agent() -> srv.AgentDef {
 
 # ---- Entry point -------------------------------------------------
 fn main() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Nil {
-  mcp.server.run(make_agent())
+  mcp_srv.run(make_agent())
 }
 
