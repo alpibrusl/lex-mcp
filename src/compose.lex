@@ -60,7 +60,7 @@ fn sse_headers() -> Map[Str, Str] {
 # A2A JSON-RPC dispatch (POST /). Mirrors lex-agent's `mount.rpc_route`: the
 # HTTP status is always 200 — JSON-RPC errors ride inside the envelope — and a
 # `tasks/sendSubscribe` body is answered with SSE frames instead of JSON.
-fn a2a_dispatch(agent :: srv.AgentDef, body :: Str) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Response {
+fn a2a_dispatch(agent :: srv.AgentDef, body :: Str) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] Response {
   if srv.is_subscribe_body(body) {
     mk_resp(200, srv.dispatch_subscribe_str(agent, body), sse_headers())
   } else {
@@ -70,7 +70,7 @@ fn a2a_dispatch(agent :: srv.AgentDef, body :: Str) -> [io, time, crypto, random
 
 # MCP streamable-HTTP dispatch (POST /mcp). Mirrors lex-mcp's `http.run_http`:
 # one POST → one JSON-RPC response; a notification (empty response) returns 202.
-fn mcp_dispatch(agent :: srv.AgentDef, body :: Str) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Response {
+fn mcp_dispatch(agent :: srv.AgentDef, body :: Str) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] Response {
   let out := server.handle_message(agent, body)
   if str.is_empty(out) {
     mk_resp(202, "", json_headers())
@@ -80,8 +80,8 @@ fn mcp_dispatch(agent :: srv.AgentDef, body :: Str) -> [io, time, crypto, random
 }
 
 # Serve one AgentDef over A2A + MCP on `port`. Blocks (runs the server loop).
-fn serve_both(agent :: srv.AgentDef, port :: Int) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Nil {
-  let handler := fn (req :: Request) -> [io, time, sql, concurrent, net, random, fs_read, fs_write, llm, proc, crypto] Response {
+fn serve_both(agent :: srv.AgentDef, port :: Int) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] Nil {
+  let handler := fn (req :: Request) -> [io, time, sql, concurrent, net, random, fs_read, fs_write, llm, proc, crypto, approval] Response {
     if req.method == "GET" {
       if req.path == "/.well-known/agent.json" {
         mk_resp(200, srv.agent_card_response(agent), json_headers())

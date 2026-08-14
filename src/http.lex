@@ -66,10 +66,11 @@ fn run_http_fn[E](port :: Int, dispatch :: (Str) -> [io, time, sql, concurrent, 
 
 # Serve a lex-agent `AgentDef`'s Skills as MCP tools over HTTP. Thin wrapper over
 # `run_http_fn`: the dispatcher is `server.handle_message`, whose effects are
-# lex-agent's fixed Skill.handle row, so `E` unifies to the empty row and this
-# signature stays closed (unchanged from pre-0.10).
-fn run_http(agent :: srv.AgentDef, port :: Int) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Nil {
-  run_http_fn(port, fn (body :: Str) -> [io, time, sql, concurrent, net, random, fs_read, fs_write, llm, proc, crypto] Str {
+# lex-agent's fixed Skill.handle row, so `E` unifies to whatever that row is
+# (currently just `approval`, added in lex-lang 0.10.10) and this signature
+# stays closed rather than itself becoming polymorphic.
+fn run_http(agent :: srv.AgentDef, port :: Int) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] Nil {
+  run_http_fn(port, fn (body :: Str) -> [io, time, sql, concurrent, net, random, fs_read, fs_write, llm, proc, crypto, approval] Str {
     server.handle_message(agent, body)
   })
 }

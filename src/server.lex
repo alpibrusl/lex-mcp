@@ -96,14 +96,14 @@ fn extract_reply_text(dispatch_response :: Str) -> Str {
 }
 
 # ---- Per-message handler -----------------------------------------
-fn handle_message(agent :: srv.AgentDef, body :: Str) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Str {
+fn handle_message(agent :: srv.AgentDef, body :: Str) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] Str {
   match rpc.parse_request(body) {
     Err(rpcerr) => rpc.response_to_str(ResErr(IdNull, rpcerr)),
     Ok(req) => route(agent, req),
   }
 }
 
-fn route(agent :: srv.AgentDef, req :: rpc.Request) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Str {
+fn route(agent :: srv.AgentDef, req :: rpc.Request) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] Str {
   if req.method == proto.method_initialize() {
     let result := proto.initialize_result(agent.card.name, agent.card.version)
     rpc.response_to_str(ResOk(req.id, result))
@@ -126,7 +126,7 @@ fn route(agent :: srv.AgentDef, req :: rpc.Request) -> [io, time, crypto, random
   }
 }
 
-fn handle_tools_call(agent :: srv.AgentDef, req :: rpc.Request) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Str {
+fn handle_tools_call(agent :: srv.AgentDef, req :: rpc.Request) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] Str {
   let params := req.params
   let skill_name := match jv.get_field(params, "name") {
     None => "",
@@ -165,7 +165,7 @@ fn handle_tools_call(agent :: srv.AgentDef, req :: rpc.Request) -> [io, time, cr
 # (either a file-not-found-style error, or "read of `-` outside
 # --allow-fs-read" under a read allowlist), so this loop previously
 # never processed a single request.
-fn run(agent :: srv.AgentDef) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Nil {
+fn run(agent :: srv.AgentDef) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] Nil {
   match io.readline() {
     None => (),
     Some(line) => {
