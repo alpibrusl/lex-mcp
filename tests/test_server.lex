@@ -74,7 +74,7 @@ fn extract_text(parts :: List[msg.Part]) -> Str {
   })
 }
 
-fn echo_handler(m :: msg.Message) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] srv.HandlerOutcome {
+fn echo_handler(m :: msg.Message) -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] srv.HandlerOutcome {
   let text := extract_text(m.parts)
   { next_state: TSCompleted, reply: Some(msg.agent_text(str.concat("echo: ", text))), artifacts: [] }
 }
@@ -85,7 +85,7 @@ fn test_agent() -> srv.AgentDef {
 }
 
 # ---- initialize --------------------------------------------------
-fn test_initialize_returns_server_info() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Result[Unit, Str] {
+fn test_initialize_returns_server_info() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] Result[Unit, Str] {
   let resp := mcp_srv.handle_message(test_agent(), "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\",\"params\":{}}")
   match assert_contains(resp, "\"serverInfo\"", "initialize must return a serverInfo object") {
     Err(e) => Err(e),
@@ -94,24 +94,24 @@ fn test_initialize_returns_server_info() -> [io, time, crypto, random, sql, fs_r
 }
 
 # ---- tools/list ----------------------------------------------------
-fn test_tools_list_returns_the_skill() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Result[Unit, Str] {
+fn test_tools_list_returns_the_skill() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] Result[Unit, Str] {
   let resp := mcp_srv.handle_message(test_agent(), "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\",\"params\":{}}")
   assert_contains(resp, "\"echo\"", "tools/list must list the agent's echo skill")
 }
 
 # ---- tools/call ------------------------------------------------------
-fn test_tools_call_dispatches_to_the_handler() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Result[Unit, Str] {
+fn test_tools_call_dispatches_to_the_handler() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] Result[Unit, Str] {
   let resp := mcp_srv.handle_message(test_agent(), "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"echo\",\"arguments\":{\"text\":\"hi\"}}}")
   assert_contains(resp, "echo: hi", "tools/call must dispatch to echo_handler and carry its reply text")
 }
 
-fn test_tools_call_missing_name_is_an_error() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Result[Unit, Str] {
+fn test_tools_call_missing_name_is_an_error() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] Result[Unit, Str] {
   let resp := mcp_srv.handle_message(test_agent(), "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"tools/call\",\"params\":{}}")
   assert_contains(resp, "missing required param", "tools/call with no `name` must report the missing-param error, not silently no-op")
 }
 
 # ---- Unknown method ---------------------------------------------------
-fn test_unknown_method_is_method_not_found() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Result[Unit, Str] {
+fn test_unknown_method_is_method_not_found() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] Result[Unit, Str] {
   let resp := mcp_srv.handle_message(test_agent(), "{\"jsonrpc\":\"2.0\",\"id\":5,\"method\":\"bogus/method\",\"params\":{}}")
   match assert_contains(resp, "\"error\"", "an unrecognized method must be a JSON-RPC error") {
     Err(e) => Err(e),
@@ -120,13 +120,13 @@ fn test_unknown_method_is_method_not_found() -> [io, time, crypto, random, sql, 
 }
 
 # ---- Malformed request --------------------------------------------
-fn test_malformed_json_is_a_parse_error() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Result[Unit, Str] {
+fn test_malformed_json_is_a_parse_error() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] Result[Unit, Str] {
   let resp := mcp_srv.handle_message(test_agent(), "not json at all")
   assert_contains(resp, "\"error\"", "unparseable input must produce a JSON-RPC error response, not crash the loop")
 }
 
 # ---- Suite + runner ---------------------------------------------------
-fn suite() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] List[Result[Unit, Str]] {
+fn suite() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] List[Result[Unit, Str]] {
   [test_initialize_returns_server_info(), test_tools_list_returns_the_skill(), test_tools_call_dispatches_to_the_handler(), test_tools_call_missing_name_is_an_error(), test_unknown_method_is_method_not_found(), test_malformed_json_is_a_parse_error()]
 }
 
@@ -139,7 +139,7 @@ fn count_failures(rs :: List[Result[Unit, Str]]) -> Int {
   })
 }
 
-fn run_all() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc] Int {
+fn run_all() -> [io, time, crypto, random, sql, fs_read, fs_write, net, concurrent, llm, proc, approval] Int {
   count_failures(suite())
 }
 
