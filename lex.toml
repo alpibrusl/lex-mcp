@@ -1,7 +1,7 @@
 [package]
 name        = "lex-mcp"
 version     = "0.2.0"
-lex         = "0.10.18"
+lex         = "0.11.32"
 description = "MCP (Model Context Protocol) stdio + HTTP server — bridges lex-agent Skills to MCP JSON-RPC, and serves arbitrary dispatchers (incl. effectful/actuating ones) via row-polymorphic run_http_fn."
 license     = "EUPL-1.2"
 
